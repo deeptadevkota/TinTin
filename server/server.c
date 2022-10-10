@@ -69,10 +69,7 @@ int main()
     while (true)
     {
 
-        struct Request *request = (Request *)malloc(sizeof(Request));
-        request->sock_len = sizeof(struct sockaddr_in);
-
-        n = recvfrom(sock_raw, request->buffer, PACK_SIZE, 0, (struct sockaddr *)&request->sock_addr, &request->sock_len);
+        n = recvfrom(sock_raw, request->buffer, PACK_SIZE, 0, NULL, NULL);
 
         if (n < 0)
             perror("error in recvfrom");

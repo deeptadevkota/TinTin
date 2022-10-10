@@ -1,16 +1,15 @@
 #define MAX_THREADS 20000
-#define PACK_SIZE 270	
+#define PACK_SIZE 270
 
 struct Thread
 {
     uint32_t auth_conn_cookie;
+    unsigned char h_source[ETH_ALEN]; 
     struct Thread *next_thread;
 };
 
 struct Request
 {
-    socklen_t sock_len;
-    struct sockaddr_in sock_addr;
     char buffer[PACK_SIZE];
 };
 
