@@ -27,5 +27,14 @@ void parse_packet(char *packet_str, struct Packet &packet)
     packet.msg_type = tintin->msg_type;
     packet.mflags = tintin->mflags;
 
+    int len = PACKET_SIZE - (sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct contract_offset));
+
+    short byte_no = sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct contract_offset) - 1;
+
+    short buf_byte = 0;
+    while (len--)
+    {
+        packet.buffer[buf_byte++] = packet_str[byte_no++];
+    }
     return;
 }
