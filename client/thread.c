@@ -31,8 +31,8 @@ void *request_handling(void *req)
 
     struct Packet packet = parse_packet(packet_str);
 
-    // fresh request
-    if (packet.msg_type == 0 && packet.mflags == 0)
+    // fresh response
+    if (packet.msg_type == 0 && packet.mflags == 1)
     {
         pthread_mutex_lock(&mutex);
         int r = thread_insertion(packet.authentication_cookie);
@@ -44,7 +44,7 @@ void *request_handling(void *req)
             // send the fresh response back
         }
     }
-    else if (packet.msg_type == 1 && packet.mflags == 0)
+    else if (packet.msg_type == 1 && packet.mflags == 1)
     {
     }
 }
@@ -70,8 +70,18 @@ int thread_insertion(uint32_t authentication_cookie)
     }
 }
 
-int thread_removal(uint32_t auth_id)
+int thread_exist(uint32_t auth_id)
 {
+    struct Thread *head = h_thread;
+    while (head)
+    {
+
+        if (head->auth_conn_cookie == auth_id)
+            return 1;
+
+        head = head->next_thread;
+    }
+    return 0;
 }
 
 void make_packet_send(struct Packet packet)

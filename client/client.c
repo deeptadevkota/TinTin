@@ -13,7 +13,14 @@
 #include <linux/if_packet.h>
 #include <arpa/inet.h>
 #include <pthread.h>
-#include "thread.h"
+#include <thread.h>
+
+#define DESTMAC0 0xd0
+#define DESTMAC1 0x67
+#define DESTMAC2 0xe5
+#define DESTMAC3 0x12
+#define DESTMAC4 0x6f
+#define DESTMAC5 0x8f
 
 int sock_raw, n;
 struct sockaddr_ll sadr_ll;
@@ -61,6 +68,23 @@ int main()
         perror("Error binding raw socket to interface\n");
         return -1;
     }
+
+    // fresh_request sending
+    struct Packet packet;
+    packet.msg_type = 0;
+    packet.mflags = 0;
+    packet.authentication_cookie = 1;
+    packet.h_source[0] = DESTMAC0;
+    packet.h_source[1] = DESTMAC1;
+    packet.h_source[2] = DESTMAC2;
+    packet.h_source[3] = DESTMAC3;
+    packet.h_source[4] = DESTMAC4;
+    packet.h_source[5] = DESTMAC5;
+
+    make_packet_send(packet);
+    int r = thread_insertion(packet.authentication_cookie);
+    
+
     int rc = 0;
     pthread_t threads[MAX_THREADS];
 
