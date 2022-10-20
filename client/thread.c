@@ -15,6 +15,13 @@
 #include "new_ip.h"
 #include "tintin.h"
 
+#define DESTMAC0 0xd0
+#define DESTMAC1 0x67
+#define DESTMAC2 0xe5
+#define DESTMAC3 0x12
+#define DESTMAC4 0x6f
+#define DESTMAC5 0x8f
+
 extern int sock_raw, n;
 extern struct sockaddr_ll sadr_ll;
 
@@ -34,18 +41,37 @@ void *request_handling(void *req)
     // fresh response
     if (packet.msg_type == 0 && packet.mflags == 1)
     {
-        pthread_mutex_lock(&mutex);
-        int r = thread_insertion(packet.authentication_cookie);
-        pthread_mutex_unlock(&mutex);
 
-        if (r == 1)
+        int r = thread_exist(packet.authentication_cookie);
+        if (r != 1)
         {
+            printf("Invalid async response");
+        }
+        else
+        {
+            // fresh_request sending
+            struct Packet packet;
+            packet.msg_type = 0;
+            packet.mflags = 1;
+            packet.authentication_cookie = packet.authentication_cookie;
+            packet.h_source[0] = DESTMAC0;
+            packet.h_source[1] = DESTMAC1;
+            packet.h_source[2] = DESTMAC2;
+            packet.h_source[3] = DESTMAC3;
+            packet.h_source[4] = DESTMAC4;
+            packet.h_source[5] = DESTMAC5;
+
             make_packet_send(packet);
-            // send the fresh response back
         }
     }
+    // if async response
     else if (packet.msg_type == 1 && packet.mflags == 1)
     {
+        int r = thread_exist(packet.authentication_cookie);
+        if (r != 1)
+        {
+            printf("Invalid async response");
+        }
     }
 }
 
