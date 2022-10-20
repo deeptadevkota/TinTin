@@ -110,3 +110,8 @@ int main()
     }
     return 0;
 }
+
+// return authentication cookie
+uint32_t gen_auth_cookie(){
+
+}
