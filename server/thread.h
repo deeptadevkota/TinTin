@@ -33,3 +33,4 @@ struct Thread
 void *request_handling(void *);
 int thread_insertion(uint32_t);
 int thread_removal(uint32_t);
+void make_packet_send(struct Packet);

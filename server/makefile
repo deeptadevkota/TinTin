@@ -1,8 +1,8 @@
-all: server.o packet.o thread.o
-		g++ server.o packet.o thread.o -o server
-server.o:
-		g++ -c server.c -o server.o
+all: server.o thread.o packet.o
+	g++ server.o thread.o packet.o -lpthread -o server
 packet.o:
-		g++ packet.c -o packet.o
-thread.o:
-		g++ thread.c -o thread.o
+	g++ -c packet.c -o packet.o
+thread.o: packet.o
+	g++ -c thread.c -o thread.o
+server.o: thread.o packet.o
+	g++ -lpthread -c server.c -o server.o
