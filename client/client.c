@@ -13,7 +13,7 @@
 #include <linux/if_packet.h>
 #include <arpa/inet.h>
 #include <pthread.h>
-#include <thread.h>
+#include "thread.h"
 
 #define DESTMAC0 0xd0
 #define DESTMAC1 0x67
@@ -29,6 +29,7 @@ int thread_no = 0;
 pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
 struct Thread *h_thread = NULL;
 struct Thread *t_thread = NULL;
+struct ifreq ifreq_c;
 
 int main()
 {
@@ -49,7 +50,7 @@ int main()
 
     // getting MAC Address
 
-    struct ifreq ifreq_c;
+    
     memset(&ifreq_c, 0, sizeof(ifreq_c));
     strncpy(ifreq_c.ifr_name, "enp0s3", IFNAMSIZ - 1);
     if ((ioctl(sock_raw, SIOCGIFHWADDR, &ifreq_c)) < 0)

@@ -11,6 +11,7 @@
 #include <stdio.h>
 #include <pthread.h>
 #include <linux/if_packet.h>
+#include <net/if.h>
 #include "thread.h"
 #include "new_ip.h"
 #include "tintin.h"
@@ -29,6 +30,7 @@ extern int thread_no;
 extern pthread_mutex_t mutex;
 extern struct Thread *h_thread;
 extern struct Thread *t_thread;
+extern struct ifreq ifreq_c;
 
 void *request_handling(void *req)
 {
@@ -134,11 +136,11 @@ void make_packet_send(struct Packet packet)
     int total_len = 0;
     total_len += sizeof(struct ethhdr);
 
-    struct newip_offset *new_ip_offset_val;
-    new_ip_offset_val = (struct new_ip_offset *)(sendbuff + sizeof(struct ethhdr));
-    new_ip_offset_val->shipping_offset = 1;
-    new_ip_offset_val->contract_offset = 2;
-    new_ip_offset_val->payload_offset = 3;
+    struct newip_offset *newip_offset_val;
+    newip_offset_val = (struct newip_offset *)(sendbuff + sizeof(struct ethhdr));
+    newip_offset_val->shipping_offset = 1;
+    newip_offset_val->contract_offset = 2;
+    newip_offset_val->payload_offset = 3;
 
     total_len += sizeof(struct newip_offset);
 
