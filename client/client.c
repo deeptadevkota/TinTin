@@ -72,9 +72,9 @@ int main()
 
     // fresh_request sending
     struct Packet packet;
-    packet.msg_type = 0;
+    packet.msg_type = 1;
     packet.mflags = 0;
-    packet.authentication_cookie = 1;
+    packet.authentication_cookie = 1; // ******* generate auth cookie *********
     packet.h_source[0] = DESTMAC0;
     packet.h_source[1] = DESTMAC1;
     packet.h_source[2] = DESTMAC2;

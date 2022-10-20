@@ -41,33 +41,33 @@ void *request_handling(void *req)
     struct Packet packet = parse_packet(packet_str);
 
     // fresh response
-    if (packet.msg_type == 0 && packet.mflags == 1)
+    if (packet.msg_type == 1 && packet.mflags == 1)
     {
 
         int r = thread_exist(packet.authentication_cookie);
         if (r != 1)
         {
-            printf("Invalid async response");
+            printf("Invalid fresh response");
         }
         else
         {
-            // fresh_request sending
-            struct Packet packet;
-            packet.msg_type = 0;
-            packet.mflags = 1;
-            packet.authentication_cookie = packet.authentication_cookie;
-            packet.h_source[0] = DESTMAC0;
-            packet.h_source[1] = DESTMAC1;
-            packet.h_source[2] = DESTMAC2;
-            packet.h_source[3] = DESTMAC3;
-            packet.h_source[4] = DESTMAC4;
-            packet.h_source[5] = DESTMAC5;
+            // async_request sending
+            struct Packet packet1;
+            packet1.msg_type = 3;
+            packet1.mflags = 0;
+            packet1.authentication_cookie = packet.authentication_cookie;
+            packet1.h_source[0] = DESTMAC0;
+            packet1.h_source[1] = DESTMAC1;
+            packet1.h_source[2] = DESTMAC2;
+            packet1.h_source[3] = DESTMAC3;
+            packet1.h_source[4] = DESTMAC4;
+            packet1.h_source[5] = DESTMAC5;
 
-            make_packet_send(packet);
+            make_packet_send(packet1);
         }
     }
     // if async response
-    else if (packet.msg_type == 1 && packet.mflags == 1)
+    else if (packet.msg_type == 3 && packet.mflags == 1)
     {
         int r = thread_exist(packet.authentication_cookie);
         if (r != 1)
