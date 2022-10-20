@@ -16,6 +16,13 @@
 #include "new_ip.h"
 #include "tintin.h"
 
+#define DESTMAC0 0xd0
+#define DESTMAC1 0x67
+#define DESTMAC2 0xe5
+#define DESTMAC3 0x12
+#define DESTMAC4 0x6f
+#define DESTMAC5 0x8f
+
 extern int sock_raw, n;
 extern struct sockaddr_ll sadr_ll;
 
@@ -34,20 +41,54 @@ void *request_handling(void *req)
     struct Packet packet = parse_packet(packet_str);
 
     // fresh request
-    if (packet.msg_type == 0 && packet.mflags == 0)
+    if (packet.msg_type == 1 && packet.mflags == 0)
     {
-        pthread_mutex_lock(&mutex);
-        int r = thread_insertion(packet.authentication_cookie);
-        pthread_mutex_unlock(&mutex);
 
-        if (r == 1)
+        if (thread_exist(packet.authentication_cookie) == 0)
         {
-            make_packet_send(packet);
-            // send the fresh response back
+
+            pthread_mutex_lock(&mutex);
+            int r = thread_insertion(packet.authentication_cookie);
+            pthread_mutex_unlock(&mutex);
+
+            if (r == 1)
+            {
+                // fresh_response sending
+                struct Packet packet1;
+                packet1.msg_type = 1;
+                packet1.mflags = 1;
+                packet1.authentication_cookie = packet.authentication_cookie;
+                packet1.h_source[0] = DESTMAC0;
+                packet1.h_source[1] = DESTMAC1;
+                packet1.h_source[2] = DESTMAC2;
+                packet1.h_source[3] = DESTMAC3;
+                packet1.h_source[4] = DESTMAC4;
+                packet1.h_source[5] = DESTMAC5;
+
+                make_packet_send(packet1);
+
+                // send the fresh response back
+            }
         }
     }
-    else if (packet.msg_type == 1 && packet.mflags == 0)
+    else if (packet.msg_type == 3 && packet.mflags == 0)
     {
+        // fresh_response sending
+        if (thread_exist(packet.authentication_cookie))
+        {
+            struct Packet packet1;
+            packet1.msg_type = 3;
+            packet1.mflags = 1;
+            packet1.authentication_cookie = packet.authentication_cookie;
+            packet1.h_source[0] = DESTMAC0;
+            packet1.h_source[1] = DESTMAC1;
+            packet1.h_source[2] = DESTMAC2;
+            packet1.h_source[3] = DESTMAC3;
+            packet1.h_source[4] = DESTMAC4;
+            packet1.h_source[5] = DESTMAC5;
+
+            make_packet_send(packet1);
+        }
     }
 }
 
@@ -72,8 +113,18 @@ int thread_insertion(uint32_t authentication_cookie)
     }
 }
 
-int thread_removal(uint32_t auth_id)
+int thread_exist(uint32_t auth_id)
 {
+    struct Thread *head = h_thread;
+    while (head)
+    {
+
+        if (head->auth_conn_cookie == auth_id)
+            return 1;
+
+        head = head->next_thread;
+    }
+    return 0;
 }
 
 void make_packet_send(struct Packet packet)
