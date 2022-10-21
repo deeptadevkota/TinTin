@@ -13,6 +13,7 @@
 #include <linux/if_packet.h>
 #include <arpa/inet.h>
 #include <pthread.h>
+#include <stdlib.h>
 #include "thread.h"
 
 #define DESTMAC0 0xd0
@@ -113,5 +114,8 @@ int main()
 
 // return authentication cookie
 uint32_t gen_auth_cookie(){
-
+    time_t t;
+    srand((unsigned) time(&t));
+    u_int32_t ran= rand();
+    return ran;
 }
