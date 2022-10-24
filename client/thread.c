@@ -51,6 +51,7 @@ void *request_handling(void *req)
         }
         else
         {
+            printf("Fresh response received!");
             // async_request sending
             struct Packet packet1;
             packet1.msg_type = 3;
@@ -64,11 +65,13 @@ void *request_handling(void *req)
             packet1.h_source[5] = DESTMAC5;
 
             make_packet_send(packet1);
+            printf("Async request sent!");
         }
     }
     // if async response
     else if (packet.msg_type == 3 && packet.mflags == 1)
     {
+        printf("Async response received!");
         int r = thread_exist(packet.authentication_cookie);
         if (r != 1)
         {
@@ -115,7 +118,7 @@ int thread_exist(uint32_t auth_id)
 void make_packet_send(struct Packet packet)
 {
     unsigned char *sendbuff = (unsigned char *)malloc(PACKET_SIZE); // increase in case of more data
-    memset(sendbuff, 0, 64);
+    memset(sendbuff, 0, PACKET_SIZE);
     struct ethhdr *eth = (struct ethhdr *)(sendbuff);
     eth->h_source[0] = (unsigned char)(ifreq_c.ifr_hwaddr.sa_data[0]);
     eth->h_source[1] = (unsigned char)(ifreq_c.ifr_hwaddr.sa_data[1]);
@@ -162,7 +165,8 @@ void make_packet_send(struct Packet packet)
     tintin->mflags = packet.mflags;
     tintin->magic = 8;
 
-    total_len += sizeof(struct TinTin);
+    total_len = PACKET_SIZE;
+    printf("%d\n", sock_raw);
 
     int send_len = sendto(sock_raw, sendbuff, total_len, 0, (const struct sockaddr *)&sadr_ll, sizeof(struct sockaddr_ll));
     if (send_len < 0)
