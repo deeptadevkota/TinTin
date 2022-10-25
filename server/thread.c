@@ -44,6 +44,7 @@ void *request_handling(void *req)
     if (packet.msg_type == 1 && packet.mflags == 0)
     {
 
+        printf("Fresh request received!");
         if (thread_exist(packet.authentication_cookie) == 0)
         {
 
@@ -66,6 +67,7 @@ void *request_handling(void *req)
                 packet1.h_source[5] = DESTMAC5;
 
                 make_packet_send(packet1);
+                printf("Fresh response sent");
 
                 // send the fresh response back
             }
@@ -73,7 +75,8 @@ void *request_handling(void *req)
     }
     else if (packet.msg_type == 3 && packet.mflags == 0)
     {
-        // fresh_response sending
+        printf("Async request received!");
+        // async_response sending
         if (thread_exist(packet.authentication_cookie))
         {
             struct Packet packet1;
@@ -88,6 +91,7 @@ void *request_handling(void *req)
             packet1.h_source[5] = DESTMAC5;
 
             make_packet_send(packet1);
+            printf("Async response received!");
         }
     }
 }
