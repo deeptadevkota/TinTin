@@ -26,7 +26,7 @@ struct ifreq ifreq_c;
 
 int main()
 {
-    int sock_raw = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
+    sock_raw = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
     if (sock_raw < 0)
     {
         perror("error in socket\n");
@@ -43,8 +43,7 @@ int main()
 
     // getting MAC Address
 
-    
-    memset(&ifreq_c, 0, sizeof(ifreq_c));
+        memset(&ifreq_c, 0, sizeof(ifreq_c));
     strncpy(ifreq_c.ifr_name, "enp0s3", IFNAMSIZ - 1);
     if ((ioctl(sock_raw, SIOCGIFHWADDR, &ifreq_c)) < 0)
         printf("error in SIOCGIFHWADDR ioctl reading");
