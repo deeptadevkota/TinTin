@@ -8,5 +8,5 @@ ip -n server link set eth1 up
 ip -n client link set lo up
 ip -n server link set lo up
 
-ip netns exec server ./a.out
-ip netns exec client ./a.out
+ip netns exec server ./server
+ip netns exec client ./client
