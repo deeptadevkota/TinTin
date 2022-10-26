@@ -34,7 +34,7 @@ struct ifreq ifreq_c;
 int main()
 {
     sock_raw = socket(AF_PACKET, SOCK_RAW, htons(ETH_P_ALL));
-    printf("%d\n", sock_raw);
+    // printf("%d\n", sock_raw);
     if (sock_raw < 0)
     {
         perror("error in socket\n");
@@ -92,7 +92,7 @@ int main()
     packet.h_source[5] = DESTMAC5;
 
     make_packet_send(packet);
-    printf("1\n");
+    printf("Sending Fresh Request\n");
     int r = thread_insertion(packet.authentication_cookie);
 
     int rc = 0;
@@ -110,7 +110,7 @@ int main()
 
         if (eth->h_proto == 46728)
         {
-            printf("New IP packet received!\n");
+            // printf("New IP packet received!\n");
             rc = pthread_create(&threads[thread_no], NULL, request_handling, (void *)request);
             if (rc)
             {

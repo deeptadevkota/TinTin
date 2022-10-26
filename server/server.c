@@ -78,7 +78,7 @@ int main()
 
         if (eth->h_proto == 46728)
         {
-            printf("New IP packet received!\n");
+            // printf("New IP packet received!\n");
             rc = pthread_create(&threads[thread_no], NULL, request_handling, (void *)request);
             if (rc)
             {

@@ -37,17 +37,17 @@ void *request_handling(void *req)
     struct Request *request = (struct Request *)req;
 
     struct Packet packet = parse_packet(request->buffer);
-    printf("type %d, flag %d\n", packet.msg_type, packet.mflags);
+    // printf("type %d, flag %d\n", packet.msg_type, packet.mflags);
     if ((packet.msg_type == 1) && (packet.mflags == 0))
     {
-        printf("1\n");
+        printf("Fresh Request Received. type: %d, flag: %d\n", packet.msg_type, packet.mflags);
     }
     if ((packet.msg_type == 1) && (packet.mflags == 0))
     {
-        printf("2\n");
+        // printf("2\n");
         if (thread_exist(packet.authentication_cookie) == 0)
         {
-            printf("3\n");
+            // printf("3\n");
             pthread_mutex_lock(&mutex);
             int r = thread_insertion(packet.authentication_cookie);
             pthread_mutex_unlock(&mutex);
@@ -55,7 +55,7 @@ void *request_handling(void *req)
             if (r == 1)
             {
                 // fresh_response sending
-                printf("4\n");
+                printf("Sending fresh response\n");
                 struct Packet packet1;
                 packet1.msg_type = 1;
                 packet1.mflags = 1;
@@ -68,7 +68,7 @@ void *request_handling(void *req)
                 packet1.h_source[5] = DESTMAC5;
 
                 make_packet_send(packet1);
-                printf("5\n");
+                // printf("5\n");
 
                 // send the fresh response back
             }
@@ -77,7 +77,7 @@ void *request_handling(void *req)
     else if (packet.msg_type == 3 && packet.mflags == 0)
     {
 
-        printf("6\n");
+        printf("Async Request Received. type: %d, flag: %d\n", packet.msg_type, packet.mflags);
         if (thread_exist(packet.authentication_cookie))
         {
             struct Packet packet1;
@@ -92,8 +92,8 @@ void *request_handling(void *req)
             packet1.h_source[5] = DESTMAC5;
 
             make_packet_send(packet1);
-            printf("7\n");
         }
+        printf("Sending async Response\n");
     }
 }
 

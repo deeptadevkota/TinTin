@@ -36,7 +36,7 @@ void *request_handling(void *req)
 {
     struct Request *request = (struct Request *)req;
     struct Packet packet = parse_packet(request->buffer);
-    printf("type %d, flag %d\n", packet.msg_type, packet.mflags);
+    // printf("type %d, flag %d\n", packet.msg_type, packet.mflags);
     // fresh response
     if (packet.msg_type == 1 && packet.mflags == 1)
     {
@@ -44,11 +44,13 @@ void *request_handling(void *req)
         int r = thread_exist(packet.authentication_cookie);
         if (r != 1)
         {
-            printf("0\n");
+            // printf("0\n");
         }
         else
         {
-            printf("1\n");
+            printf("Fresh Response Received. type: %d, flag: %d\n", packet.msg_type, packet.mflags);
+
+            printf("Sending Async Request\n");
             // async_request sending
             struct Packet packet1;
             packet1.msg_type = 3;
@@ -62,13 +64,14 @@ void *request_handling(void *req)
             packet1.h_source[5] = DESTMAC5;
 
             make_packet_send(packet1);
-            printf("2\n");
+            // printf("2\n");
         }
     }
     // if async response
     else if (packet.msg_type == 3 && packet.mflags == 1)
     {
-        printf("3\n");
+        // printf("3\n");
+        printf("Async response Received, type: %d, flag: %d. \n", packet.msg_type, packet.mflags);
         int r = thread_exist(packet.authentication_cookie);
         if (r != 1)
         {
