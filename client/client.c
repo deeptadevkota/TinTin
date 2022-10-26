@@ -45,16 +45,24 @@ int main()
 
     struct ifreq ifreq_i;
     memset(&ifreq_i, 0, sizeof(ifreq_i));
-    strncpy(ifreq_i.ifr_name, "enp0s3", IFNAMSIZ - 1);
+    strncpy(ifreq_i.ifr_name, "eth0", IFNAMSIZ - 1);
     if ((ioctl(sock_raw, SIOCGIFINDEX, &ifreq_i)) < 0)
         printf("error in index ioctl reading");
 
-    // getting MAC Address
+    // getting MAC Address of the client
 
     memset(&ifreq_c, 0, sizeof(ifreq_c));
-    strncpy(ifreq_c.ifr_name, "enp0s3", IFNAMSIZ - 1);
+    strncpy(ifreq_c.ifr_name, "eth0", IFNAMSIZ - 1);
     if ((ioctl(sock_raw, SIOCGIFHWADDR, &ifreq_c)) < 0)
         printf("error in SIOCGIFHWADDR ioctl reading");
+
+    // getting MAC Address of the server
+
+    // struct ifreq ifreq_s;
+    // memset(&ifreq_s, 0, sizeof(ifreq_s));
+    // strncpy(ifreq_s.ifr_name, "eth1", IFNAMSIZ - 1);
+    // if ((ioctl(sock_raw, SIOCGIFHWADDR, &ifreq_c)) < 0)
+    //     printf("error in SIOCGIFHWADDR ioctl reading");
 
     // filling the socket address
 
@@ -75,6 +83,7 @@ int main()
     packet.msg_type = 1;
     packet.mflags = 0;
     packet.authentication_cookie = 1; // ******* generate auth cookie *********
+    // should be filled with the server MAC address
     packet.h_source[0] = DESTMAC0;
     packet.h_source[1] = DESTMAC1;
     packet.h_source[2] = DESTMAC2;

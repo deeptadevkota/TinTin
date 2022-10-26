@@ -37,14 +37,14 @@ int main()
 
     struct ifreq ifreq_i;
     memset(&ifreq_i, 0, sizeof(ifreq_i));
-    strncpy(ifreq_i.ifr_name, "enp0s3", IFNAMSIZ - 1);
+    strncpy(ifreq_i.ifr_name, "eth1", IFNAMSIZ - 1);
     if ((ioctl(sock_raw, SIOCGIFINDEX, &ifreq_i)) < 0)
         printf("error in index ioctl reading");
 
     // getting MAC Address
 
     memset(&ifreq_c, 0, sizeof(ifreq_c));
-    strncpy(ifreq_c.ifr_name, "enp0s3", IFNAMSIZ - 1);
+    strncpy(ifreq_c.ifr_name, "eth1", IFNAMSIZ - 1);
     if ((ioctl(sock_raw, SIOCGIFHWADDR, &ifreq_c)) < 0)
         printf("error in SIOCGIFHWADDR ioctl reading");
 
