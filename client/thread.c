@@ -35,11 +35,8 @@ extern struct ifreq ifreq_c;
 void *request_handling(void *req)
 {
     struct Request *request = (struct Request *)req;
-    char packet_str[PACKET_SIZE];
-    strcpy(packet_str, request->buffer);
-
-    struct Packet packet = parse_packet(packet_str);
-
+    struct Packet packet = parse_packet(request->buffer);
+    printf("type %d, flag %d\n", packet.msg_type, packet.mflags);
     // fresh response
     if (packet.msg_type == 1 && packet.mflags == 1)
     {
@@ -47,11 +44,11 @@ void *request_handling(void *req)
         int r = thread_exist(packet.authentication_cookie);
         if (r != 1)
         {
-            printf("Invalid fresh response");
+            printf("0\n");
         }
         else
         {
-            printf("Fresh response received!");
+            printf("1\n");
             // async_request sending
             struct Packet packet1;
             packet1.msg_type = 3;
@@ -65,17 +62,17 @@ void *request_handling(void *req)
             packet1.h_source[5] = DESTMAC5;
 
             make_packet_send(packet1);
-            printf("Async request sent!");
+            printf("2\n");
         }
     }
     // if async response
     else if (packet.msg_type == 3 && packet.mflags == 1)
     {
-        printf("Async response received!");
+        printf("3\n");
         int r = thread_exist(packet.authentication_cookie);
         if (r != 1)
         {
-            printf("Invalid async response");
+            printf("0\n");
         }
     }
 }
@@ -166,7 +163,6 @@ void make_packet_send(struct Packet packet)
     tintin->magic = 8;
 
     total_len = PACKET_SIZE;
-    printf("%d\n", sock_raw);
 
     int send_len = sendto(sock_raw, sendbuff, total_len, 0, (const struct sockaddr *)&sadr_ll, sizeof(struct sockaddr_ll));
     if (send_len < 0)

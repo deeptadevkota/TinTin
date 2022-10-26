@@ -83,7 +83,7 @@ int main()
     packet.h_source[5] = DESTMAC5;
 
     make_packet_send(packet);
-    printf("Fresh request sent!\n");
+    printf("1\n");
     int r = thread_insertion(packet.authentication_cookie);
 
     int rc = 0;
@@ -97,21 +97,30 @@ int main()
 
         if (n < 0)
             perror("error in recvfrom");
+        struct ethhdr *eth = (struct ethhdr *)(request->buffer);
 
-        rc = pthread_create(&threads[thread_no], NULL, request_handling, (void *)request);
-        if (rc)
+        if (eth->h_proto == 46728)
         {
-            perror("error in processing the request\n");
-        }
-        else
-        {
-            thread_no++;
+            printf("New IP packet received!\n");
+            rc = pthread_create(&threads[thread_no], NULL, request_handling, (void *)request);
+            if (rc)
+            {
+                perror("error in processing the request\n");
+            }
+            else
+            {
+                thread_no++;
+            }
         }
     }
+
     return 0;
 }
 
-// return authentication cookie
 uint32_t gen_auth_cookie()
 {
+    time_t t;
+    srand((unsigned)time(&t));
+    u_int32_t ran = rand();
+    return ran;
 }

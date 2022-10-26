@@ -28,6 +28,8 @@ struct Packet parse_packet(char *packet_str)
     packet.msg_type = tintin->msg_type;
     packet.mflags = tintin->mflags;
 
+  
+
     int len = PACKET_SIZE - (sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct shipping_spec));
 
     short byte_no = sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct shipping_spec) - 1;

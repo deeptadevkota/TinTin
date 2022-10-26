@@ -35,19 +35,19 @@ extern struct ifreq ifreq_c;
 void *request_handling(void *req)
 {
     struct Request *request = (struct Request *)req;
-    char packet_str[PACKET_SIZE];
-    strcpy(packet_str, request->buffer);
 
-    struct Packet packet = parse_packet(packet_str);
-
-    // fresh request
-    if (packet.msg_type == 1 && packet.mflags == 0)
+    struct Packet packet = parse_packet(request->buffer);
+    printf("type %d, flag %d\n", packet.msg_type, packet.mflags);
+    if ((packet.msg_type == 1) && (packet.mflags == 0))
     {
-
-        printf("Fresh request received!");
+        printf("1\n");
+    }
+    if ((packet.msg_type == 1) && (packet.mflags == 0))
+    {
+        printf("2\n");
         if (thread_exist(packet.authentication_cookie) == 0)
         {
-
+            printf("3\n");
             pthread_mutex_lock(&mutex);
             int r = thread_insertion(packet.authentication_cookie);
             pthread_mutex_unlock(&mutex);
@@ -55,6 +55,7 @@ void *request_handling(void *req)
             if (r == 1)
             {
                 // fresh_response sending
+                printf("4\n");
                 struct Packet packet1;
                 packet1.msg_type = 1;
                 packet1.mflags = 1;
@@ -67,7 +68,7 @@ void *request_handling(void *req)
                 packet1.h_source[5] = DESTMAC5;
 
                 make_packet_send(packet1);
-                printf("Fresh response sent");
+                printf("5\n");
 
                 // send the fresh response back
             }
@@ -75,8 +76,8 @@ void *request_handling(void *req)
     }
     else if (packet.msg_type == 3 && packet.mflags == 0)
     {
-        printf("Async request received!");
-        // async_response sending
+
+        printf("6\n");
         if (thread_exist(packet.authentication_cookie))
         {
             struct Packet packet1;
@@ -91,7 +92,7 @@ void *request_handling(void *req)
             packet1.h_source[5] = DESTMAC5;
 
             make_packet_send(packet1);
-            printf("Async response received!");
+            printf("7\n");
         }
     }
 }
@@ -115,6 +116,7 @@ int thread_insertion(uint32_t authentication_cookie)
         new_thread->next_thread = NULL;
         t_thread = new_thread;
     }
+    return 1;
 }
 
 int thread_exist(uint32_t auth_id)

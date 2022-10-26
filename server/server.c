@@ -43,7 +43,7 @@ int main()
 
     // getting MAC Address
 
-        memset(&ifreq_c, 0, sizeof(ifreq_c));
+    memset(&ifreq_c, 0, sizeof(ifreq_c));
     strncpy(ifreq_c.ifr_name, "enp0s3", IFNAMSIZ - 1);
     if ((ioctl(sock_raw, SIOCGIFHWADDR, &ifreq_c)) < 0)
         printf("error in SIOCGIFHWADDR ioctl reading");
@@ -66,21 +66,28 @@ int main()
 
     while (1)
     {
+       
         struct Request *request = (struct Request *)malloc(sizeof(struct Request));
 
         n = recvfrom(sock_raw, request->buffer, PACKET_SIZE, 0, NULL, NULL);
-
+       
         if (n < 0)
             perror("error in recvfrom");
 
-        rc = pthread_create(&threads[thread_no], NULL, request_handling, (void *)request);
-        if (rc)
+        struct ethhdr *eth = (struct ethhdr *)(request->buffer);
+
+        if (eth->h_proto == 46728)
         {
-            perror("error in processing the request\n");
-        }
-        else
-        {
-            thread_no++;
+            printf("New IP packet received!\n");
+            rc = pthread_create(&threads[thread_no], NULL, request_handling, (void *)request);
+            if (rc)
+            {
+                perror("error in processing the request\n");
+            }
+            else
+            {
+                thread_no++;
+            }
         }
     }
     return 0;
