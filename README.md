@@ -1,7 +1,7 @@
 Description
 -----------
 
-The Package contains a server and a client which communicate using TinTin protocol. 
+The project contains a server and a client which communicate using TinTin protocol. 
 
 Instructions for USE:
 ---------------------
