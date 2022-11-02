@@ -9,7 +9,7 @@ Instructions for USE:
 NAMESPACES:
 1. Emulate the network by running the bash file using sudo privileges.
 ```
-$ ./ns.sh
+$ sudo ./ns.sh
 ```
 
 SERVER:
