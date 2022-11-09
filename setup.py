@@ -24,7 +24,7 @@ class Setup:
         pass
     def setup_topology(self):
         config.set_value("assign_random_names", False)
-        config.set_value('delete_namespaces_on_termination', True)
+        config.set_value('delete_namespaces_on_termination', False)
         # config.set_value("routing_logs", True)
 
 
