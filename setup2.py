@@ -23,6 +23,17 @@ r1_h1.add_address("10.0.0.1/24")
 h2_r1.add_address("10.0.1.2/24")
 r1_h2.add_address("10.0.1.1/24")
 
+RoutingHelper(protocol="rip").populate_routing_tables()
+
+# Set IPv6 Addresses
+h1_r1.add_address("10::0:2/122")
+r1_h1.add_address("10::0:1/122")
+h2_r1.add_address("10::1:2/122")
+r1_h2.add_address("10::1:1/122")
+RoutingHelper(protocol="rip", ipv6_routing=True).populate_routing_tables()
+
+client.add_route("DEFAULT", h1_r1, "10::0:1/122")  
+server.add_route("DEFAULT", h2_r1, "10::1:1/122")
 
 
 
@@ -61,11 +72,9 @@ with router:
     subprocess.run(["tc","qdisc", "replace", "dev", "r1_h2","root","lbf"])
     print("10")
 
-client.add_route("DEFAULT", h1_r1)  
-server.add_route("DEFAULT", h2_r1)
 
-RoutingHelper(protocol="rip").populate_routing_tables()
 
+# time.sleep(3000)
 
 get_neighbor = f"ip -4 -n h1 neigh show default dev h1_r1"
 value = exec_subprocess(get_neighbor, output=True)

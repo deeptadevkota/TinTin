@@ -15,13 +15,16 @@
 #include "thread.h"
 #include "new_ip.h"
 #include "tintin.h"
+#include<netinet/in.h>
+#include<linux/ip.h>
+#include<arpa/inet.h>
 
-#define DESTMAC0 0x6a
-#define DESTMAC1 0x19
-#define DESTMAC2 0x56
-#define DESTMAC3 0x02
-#define DESTMAC4 0x00
-#define DESTMAC5 0x63
+// #define DESTMAC0 0x6a
+// #define DESTMAC1 0x19
+// #define DESTMAC2 0x56
+// #define DESTMAC3 0x02
+// #define DESTMAC4 0x00
+// #define DESTMAC5 0x63
 
 extern int sock_raw, n;
 extern struct sockaddr_ll sadr_ll;
@@ -67,7 +70,7 @@ void *request_handling(void *req)
                 tempbuf[1] = buf[i+1];
                 tempbuf[2] = 0;
                 packet1.h_source[count] = strtol(tempbuf, NULL, 16);
-                printf("%c:", packet.h_source[count]);
+                // printf("%c:", packet.h_source[count]);
                 count++;
             }
 
@@ -142,7 +145,7 @@ void make_packet_send(struct Packet packet)
     eth->h_dest[5] = packet.h_source[5];
 
     eth->h_proto = htons(0x88b6);
-    printf("%d\n",eth->h_proto);
+    // printf("%d\n",eth->h_proto);
     int total_len = 0;
     total_len += sizeof(struct ethhdr);
 
@@ -151,27 +154,31 @@ void make_packet_send(struct Packet packet)
     newip_offset_val->shipping_offset = sizeof(struct newip_offset);
     newip_offset_val->contract_offset = (__uint8_t)(sizeof(struct newip_offset) + sizeof(struct shipping_spec) + sizeof(struct src_addr) + sizeof(struct dst_addr));
     newip_offset_val->payload_offset = (__uint8_t)(sizeof(struct newip_offset) + sizeof(struct shipping_spec) + sizeof(struct src_addr) + sizeof(struct dst_addr) + sizeof(struct TinTin));
-    printf("size of shipping spec%x\n", sizeof(struct shipping_spec));
-    printf("contract offset:%x\n", newip_offset_val->contract_offset);
-    printf("payload offset:%x\n", newip_offset_val->payload_offset);
+    // printf("size of shipping spec%x\n", sizeof(struct shipping_spec));
+    // printf("contract offset:%x\n", newip_offset_val->contract_offset);
+    // printf("payload offset:%x\n", newip_offset_val->payload_offset);
 
     total_len += sizeof(struct newip_offset);
 
     struct shipping_spec *shipping_spec_val;
     shipping_spec_val = (struct shipping_spec *)(sendbuff + sizeof(struct ethhdr) + sizeof(struct newip_offset));
-    shipping_spec_val->src_addr_type = 0;
-    shipping_spec_val->dst_addr_type = 0;
+    shipping_spec_val->src_addr_type = 1;
+    shipping_spec_val->dst_addr_type = 1;
     shipping_spec_val->addr_cast = 0;
 
     struct src_addr *src_addr_val;
     src_addr_val = (struct src_addr *)(sendbuff + sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct shipping_spec));
-    src_addr_val->v4_src_addr = htonl(0x0a000002);
-
+    // src_addr_val->v4_src_addr = htonl(0x0a000002);
+    struct in6_addr src_addr;
+    inet_pton(AF_INET6, "10:0:0:0:0:0:0:2", &src_addr);
+    src_addr_val->v6_src_addr = src_addr;
 
     struct dst_addr *dst_addr_val;
     dst_addr_val = (struct dst_addr *)(sendbuff + sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct shipping_spec) + sizeof(struct src_addr));
-    dst_addr_val->v4_dst_addr = htonl(0x0a000102);
-    
+    // dst_addr_val->v4_dst_addr = htonl(0x0a000102);
+    struct in6_addr dst_addr;
+    inet_pton(AF_INET6, "10:0:0:0:0:0:1:2", &dst_addr);
+    dst_addr_val->v6_dst_addr = dst_addr;
     total_len += sizeof(struct shipping_spec) + sizeof(struct src_addr) + sizeof(struct dst_addr);
 
     struct TinTin *tintin = (struct TinTin *)(sendbuff + sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct shipping_spec) + sizeof(struct src_addr) + sizeof(struct dst_addr));

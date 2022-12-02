@@ -95,7 +95,7 @@ int main()
         tempbuf[1] = buf[i+1];
         tempbuf[2] = 0;
         packet.h_source[count] = strtol(tempbuf, NULL, 16);
-        printf("%c:", packet.h_source[count]);
+        // printf("%c:", packet.h_source[count]);
         count++;
     }
 

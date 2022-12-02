@@ -27,8 +27,8 @@ struct Packet parse_packet(char *packet_str)
     packet.authentication_cookie = ntohl(tintin->auth_conn_cookie);
     packet.msg_type = (tintin->msg_type);
     packet.mflags = (tintin->mflags);
-    printf("contract type: %d!!!\n", (tintin->contract_type));
-    printf("msg type: %d!!!\n", (tintin->msg_type));
+    // printf("contract type: %d!!!\n", (tintin->contract_type));
+    // printf("msg type: %d!!!\n", (tintin->msg_type));
 
     int len = PACKET_SIZE - (sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct shipping_spec));
 

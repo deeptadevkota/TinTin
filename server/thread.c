@@ -15,7 +15,9 @@
 #include "thread.h"
 #include "new_ip.h"
 #include "tintin.h"
-
+#include<netinet/in.h>
+#include<linux/ip.h>
+#include<arpa/inet.h>
 // #define DESTMAC0 0x96
 // #define DESTMAC1 0x7b
 // #define DESTMAC2 0x40
@@ -38,17 +40,17 @@ void *request_handling(void *req)
     struct Request *request = (struct Request *)req;
 
     struct Packet packet = parse_packet(request->buffer);
-    printf("type %d, flag %d\n", packet.msg_type, packet.mflags);
+    // printf("type %d, flag %d\n", packet.msg_type, packet.mflags);
     if ((packet.msg_type == 1) && (packet.mflags == 0))
     {
         printf("Fresh Request Received. type: %d, flag: %d\n", packet.msg_type, packet.mflags);
     }
     if ((packet.msg_type == 1) && (packet.mflags == 0))
     {
-        printf("2\n");
+        // printf("2\n");
         if (thread_exist(packet.authentication_cookie) == 0)
         {
-            printf("3\n");
+            // printf("3\n");
             pthread_mutex_lock(&mutex);
             int r = thread_insertion(packet.authentication_cookie);
             pthread_mutex_unlock(&mutex);
@@ -72,12 +74,12 @@ void *request_handling(void *req)
                     tempbuf[1] = buf[i+1];
                     tempbuf[2] = 0;
                     packet1.h_source[count] = strtol(tempbuf, NULL, 16);
-                    printf("%c:", buf[i]);
+                    // printf("%c:", buf[i]);
                     count++;
                 }
 
                 make_packet_send(packet1);
-                printf("4\n");
+                // printf("4\n");
 
                 // send the fresh response back
             }
@@ -104,7 +106,7 @@ void *request_handling(void *req)
                 tempbuf[1] = buf[i+1];
                 tempbuf[2] = 0;
                 packet1.h_source[count] = strtol(tempbuf, NULL, 16);
-                printf("%c:", packet.h_source[count]);
+                // printf("%c:", packet.h_source[count]);
                 count++;
             }
             make_packet_send(packet1);
@@ -167,7 +169,7 @@ void make_packet_send(struct Packet packet)
     eth->h_dest[3] = packet.h_source[3];
     eth->h_dest[4] = packet.h_source[4];
     eth->h_dest[5] = packet.h_source[5];
-    printf("MAC:%x\n", packet.h_source[0]);
+    // printf("MAC:%x\n", packet.h_source[0]);
     eth->h_proto = htons(0x88b6);
     // printf("%d\n",eth->h_proto);
     int total_len = 0;
@@ -177,26 +179,31 @@ void make_packet_send(struct Packet packet)
     newip_offset_val->shipping_offset = sizeof(struct newip_offset);
     newip_offset_val->contract_offset = (__uint8_t)(sizeof(struct newip_offset) + sizeof(struct shipping_spec) + sizeof(struct src_addr) + sizeof(struct dst_addr));
     newip_offset_val->payload_offset = (__uint8_t)(sizeof(struct newip_offset) + sizeof(struct shipping_spec) + sizeof(struct src_addr) + sizeof(struct dst_addr) + sizeof(struct TinTin));
-    printf("size of shipping spec%x\n", sizeof(struct shipping_spec));
-    printf("contract offset:%x\n", newip_offset_val->contract_offset);
-    printf("payload offset:%x\n", newip_offset_val->payload_offset);
+    // printf("size of shipping spec%x\n", sizeof(struct shipping_spec));
+    // printf("contract offset:%x\n", newip_offset_val->contract_offset);
+    // printf("payload offset:%x\n", newip_offset_val->payload_offset);
 
     total_len += sizeof(struct newip_offset);
 
     struct shipping_spec *shipping_spec_val;
     shipping_spec_val = (struct shipping_spec *)(sendbuff + sizeof(struct ethhdr) + sizeof(struct newip_offset));
-    shipping_spec_val->src_addr_type = 0;
-    shipping_spec_val->dst_addr_type = 0;
+    shipping_spec_val->src_addr_type = 1;
+    shipping_spec_val->dst_addr_type = 1;
     shipping_spec_val->addr_cast = 0;
 
     struct src_addr *src_addr_val;
     src_addr_val = (struct src_addr *)(sendbuff + sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct shipping_spec));
-    src_addr_val->v4_src_addr = htonl(0x0a000102);
-
+    // src_addr_val->v4_src_addr = htonl(0x0a000002);
+    struct in6_addr src_addr;
+    inet_pton(AF_INET6, "10:0:0:0:0:0:1:2", &src_addr);
+    src_addr_val->v6_src_addr = src_addr;
 
     struct dst_addr *dst_addr_val;
     dst_addr_val = (struct dst_addr *)(sendbuff + sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct shipping_spec) + sizeof(struct src_addr));
-    dst_addr_val->v4_dst_addr = htonl(0x0a000002);
+    // dst_addr_val->v4_dst_addr = htonl(0x0a000102);
+    struct in6_addr dst_addr;
+    inet_pton(AF_INET6, "10:0:0:0:0:0:0:2", &dst_addr);
+    dst_addr_val->v6_dst_addr = dst_addr;
     
     total_len += sizeof(struct shipping_spec) + sizeof(struct src_addr) + sizeof(struct dst_addr);
 

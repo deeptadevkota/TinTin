@@ -17,9 +17,9 @@ struct shipping_spec
 };
 
 struct src_addr{
-    __u32 v4_src_addr;
+    struct in6_addr v6_src_addr;
 };
 
 struct dst_addr{
-    __u32 v4_dst_addr;
+    struct in6_addr v6_dst_addr;
 };
