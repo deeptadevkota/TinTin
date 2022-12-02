@@ -15,12 +15,12 @@
 #include <pthread.h>
 #include "thread.h"
 
-#define DESTMAC0 0xd0
-#define DESTMAC1 0x67
-#define DESTMAC2 0xe5
-#define DESTMAC3 0x12
-#define DESTMAC4 0x6f
-#define DESTMAC5 0x8f
+#define DESTMAC0 0x6a
+#define DESTMAC1 0x19
+#define DESTMAC2 0x56
+#define DESTMAC3 0x02
+#define DESTMAC4 0x00
+#define DESTMAC5 0x63
 
 int sock_raw, n;
 struct sockaddr_ll sadr_ll;
@@ -45,14 +45,14 @@ int main()
 
     struct ifreq ifreq_i;
     memset(&ifreq_i, 0, sizeof(ifreq_i));
-    strncpy(ifreq_i.ifr_name, "eth0", IFNAMSIZ - 1);
+    strncpy(ifreq_i.ifr_name, "h1_r1", IFNAMSIZ - 1);
     if ((ioctl(sock_raw, SIOCGIFINDEX, &ifreq_i)) < 0)
         printf("error in index ioctl reading");
 
     // getting MAC Address of the client
 
     memset(&ifreq_c, 0, sizeof(ifreq_c));
-    strncpy(ifreq_c.ifr_name, "eth0", IFNAMSIZ - 1);
+    strncpy(ifreq_c.ifr_name, "h1_r1", IFNAMSIZ - 1);
     if ((ioctl(sock_raw, SIOCGIFHWADDR, &ifreq_c)) < 0)
         printf("error in SIOCGIFHWADDR ioctl reading");
 
@@ -60,10 +60,11 @@ int main()
 
     // struct ifreq ifreq_s;
     // memset(&ifreq_s, 0, sizeof(ifreq_s));
-    // strncpy(ifreq_s.ifr_name, "eth1", IFNAMSIZ - 1);
+    // strncpy(ifreq_s.ifr_name, "h1-r1", IFNAMSIZ - 1);
     // if ((ioctl(sock_raw, SIOCGIFHWADDR, &ifreq_c)) < 0)
     //     printf("error in SIOCGIFHWADDR ioctl reading");
 
+    
     // filling the socket address
 
     sadr_ll.sll_ifindex = ifreq_i.ifr_ifindex;
@@ -83,13 +84,27 @@ int main()
     packet.msg_type = 1;
     packet.mflags = 0;
     packet.authentication_cookie = 1; // ******* generate auth cookie *********
+    char buf[18];
+    FILE *fp = fopen("../h1_r1_mac.txt", "r");
+    fscanf(fp, "%s", buf);
     // should be filled with the server MAC address
-    packet.h_source[0] = DESTMAC0;
-    packet.h_source[1] = DESTMAC1;
-    packet.h_source[2] = DESTMAC2;
-    packet.h_source[3] = DESTMAC3;
-    packet.h_source[4] = DESTMAC4;
-    packet.h_source[5] = DESTMAC5;
+    char tempbuf[3];
+    int count = 0;
+    for(int i=0; i<18; i+=3){
+        tempbuf[0] = buf[i];
+        tempbuf[1] = buf[i+1];
+        tempbuf[2] = 0;
+        packet.h_source[count] = strtol(tempbuf, NULL, 16);
+        printf("%c:", packet.h_source[count]);
+        count++;
+    }
+
+    // packet.h_source[0] = 
+    // packet.h_source[1] = DESTMAC1;
+    // packet.h_source[2] = DESTMAC2;
+    // packet.h_source[3] = DESTMAC3;
+    // packet.h_source[4] = DESTMAC4;
+    // packet.h_source[5] = DESTMAC5;
 
     make_packet_send(packet);
     printf("Sending Fresh Request\n");
@@ -133,3 +148,5 @@ uint32_t gen_auth_cookie()
     u_int32_t ran = rand();
     return ran;
 }
+
+

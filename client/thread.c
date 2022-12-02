@@ -16,12 +16,12 @@
 #include "new_ip.h"
 #include "tintin.h"
 
-#define DESTMAC0 0xd0
-#define DESTMAC1 0x67
-#define DESTMAC2 0xe5
-#define DESTMAC3 0x12
-#define DESTMAC4 0x6f
-#define DESTMAC5 0x8f
+#define DESTMAC0 0x6a
+#define DESTMAC1 0x19
+#define DESTMAC2 0x56
+#define DESTMAC3 0x02
+#define DESTMAC4 0x00
+#define DESTMAC5 0x63
 
 extern int sock_raw, n;
 extern struct sockaddr_ll sadr_ll;
@@ -56,12 +56,20 @@ void *request_handling(void *req)
             packet1.msg_type = 3;
             packet1.mflags = 0;
             packet1.authentication_cookie = packet.authentication_cookie;
-            packet1.h_source[0] = DESTMAC0;
-            packet1.h_source[1] = DESTMAC1;
-            packet1.h_source[2] = DESTMAC2;
-            packet1.h_source[3] = DESTMAC3;
-            packet1.h_source[4] = DESTMAC4;
-            packet1.h_source[5] = DESTMAC5;
+            char buf[18];
+            FILE *fp = fopen("../h1_r1_mac.txt", "r");
+            fscanf(fp, "%s", buf);
+            // should be filled with the server MAC address
+            char tempbuf[3];
+            int count = 0;
+            for(int i=0; i<18; i+=3){
+                tempbuf[0] = buf[i];
+                tempbuf[1] = buf[i+1];
+                tempbuf[2] = 0;
+                packet.h_source[count] = strtol(tempbuf, NULL, 16);
+                printf("%c:", packet.h_source[count]);
+                count++;
+            }
 
             make_packet_send(packet1);
             // printf("2\n");
@@ -126,7 +134,6 @@ void make_packet_send(struct Packet packet)
     eth->h_source[3] = (unsigned char)(ifreq_c.ifr_hwaddr.sa_data[3]);
     eth->h_source[4] = (unsigned char)(ifreq_c.ifr_hwaddr.sa_data[4]);
     eth->h_source[5] = (unsigned char)(ifreq_c.ifr_hwaddr.sa_data[5]);
-
     eth->h_dest[0] = packet.h_source[0];
     eth->h_dest[1] = packet.h_source[1];
     eth->h_dest[2] = packet.h_source[2];
@@ -135,35 +142,40 @@ void make_packet_send(struct Packet packet)
     eth->h_dest[5] = packet.h_source[5];
 
     eth->h_proto = htons(0x88b6);
-    // printf("%d\n",eth->h_proto);
+    printf("%d\n",eth->h_proto);
     int total_len = 0;
     total_len += sizeof(struct ethhdr);
 
     struct newip_offset *newip_offset_val;
     newip_offset_val = (struct newip_offset *)(sendbuff + sizeof(struct ethhdr));
-    newip_offset_val->shipping_offset = 1;
-    newip_offset_val->contract_offset = 2;
-    newip_offset_val->payload_offset = 3;
+    newip_offset_val->shipping_offset = sizeof(struct newip_offset);
+    newip_offset_val->contract_offset = (__uint8_t)(sizeof(struct newip_offset) + sizeof(struct shipping_spec));
+    newip_offset_val->payload_offset = (__uint8_t)(sizeof(struct newip_offset) + sizeof(struct shipping_spec) + sizeof(struct TinTin));
+    printf("size of shipping spec%x\n", sizeof(struct shipping_spec));
+    printf("contract offset:%x\n", newip_offset_val->contract_offset);
+    printf("payload offset:%x\n", newip_offset_val->payload_offset);
 
     total_len += sizeof(struct newip_offset);
 
     struct shipping_spec *shipping_spec_val;
     shipping_spec_val = (struct shipping_spec *)(sendbuff + sizeof(struct ethhdr) + sizeof(struct newip_offset));
-    shipping_spec_val->src_addr_type = 1;
-    shipping_spec_val->dst_addr_type = 2;
-    shipping_spec_val->addr_cast = 3;
-
-    total_len += sizeof(struct newip_offset);
+    shipping_spec_val->src_addr_type = 0;
+    shipping_spec_val->dst_addr_type = 0;
+    shipping_spec_val->addr_cast = 0;
+    shipping_spec_val->src_addr = htonl(0x0a000002);
+    shipping_spec_val->dst_addr = htonl(0x0a000102);
+    total_len += sizeof(struct shipping_spec);
 
     struct TinTin *tintin = (struct TinTin *)(sendbuff + sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct shipping_spec));
-    tintin->next_proto = 1;
-    tintin->hdr_len = 2;
-    tintin->control_w = 3;
-    tintin->msg_type = packet.msg_type;
+    tintin->contract_type = htons(4);
+    tintin->next_proto = htons(1);
+    tintin->hdr_len = htons(2);
+    tintin->control_w = htons(3);
+    tintin->msg_type = htons(packet.msg_type);
     tintin->auth_conn_cookie = packet.authentication_cookie;
-    tintin->mlen = 6;
-    tintin->mflags = packet.mflags;
-    tintin->magic = 8;
+    tintin->mlen = htons(6);
+    tintin->mflags = htons(packet.mflags);
+    tintin->magic = htons(8);
 
     total_len = PACKET_SIZE;
 
