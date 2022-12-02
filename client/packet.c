@@ -14,7 +14,7 @@
 
 struct Packet parse_packet(char *packet_str)
 {
-    struct Packet packet;
+   struct Packet packet;
     struct ethhdr *eth = (struct ethhdr *)(packet_str);
     packet.h_source[0] = eth->h_source[0];
     packet.h_source[1] = eth->h_source[1];
@@ -23,12 +23,15 @@ struct Packet parse_packet(char *packet_str)
     packet.h_source[4] = eth->h_source[4];
     packet.h_source[5] = eth->h_source[5];
 
-    struct TinTin *tintin = (struct TinTin *)(packet_str + sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct shipping_spec));
-    packet.authentication_cookie = tintin->auth_conn_cookie;
-    packet.msg_type = tintin->msg_type;
-    packet.mflags = tintin->mflags;
+    struct TinTin *tintin = (struct TinTin *)(packet_str + sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct shipping_spec) +sizeof(struct src_addr) + sizeof(struct dst_addr));
+    packet.authentication_cookie = ntohl(tintin->auth_conn_cookie);
+    packet.msg_type = (tintin->msg_type);
+    packet.mflags = (tintin->mflags);
+    printf("contract type: %d!!!\n", (tintin->contract_type));
+    printf("msg type: %d!!!\n", (tintin->msg_type));
 
     int len = PACKET_SIZE - (sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct shipping_spec));
+
 
     short byte_no = sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct shipping_spec) - 1;
 

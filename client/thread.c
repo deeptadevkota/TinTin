@@ -66,7 +66,7 @@ void *request_handling(void *req)
                 tempbuf[0] = buf[i];
                 tempbuf[1] = buf[i+1];
                 tempbuf[2] = 0;
-                packet.h_source[count] = strtol(tempbuf, NULL, 16);
+                packet1.h_source[count] = strtol(tempbuf, NULL, 16);
                 printf("%c:", packet.h_source[count]);
                 count++;
             }
@@ -149,8 +149,8 @@ void make_packet_send(struct Packet packet)
     struct newip_offset *newip_offset_val;
     newip_offset_val = (struct newip_offset *)(sendbuff + sizeof(struct ethhdr));
     newip_offset_val->shipping_offset = sizeof(struct newip_offset);
-    newip_offset_val->contract_offset = (__uint8_t)(sizeof(struct newip_offset) + sizeof(struct shipping_spec));
-    newip_offset_val->payload_offset = (__uint8_t)(sizeof(struct newip_offset) + sizeof(struct shipping_spec) + sizeof(struct TinTin));
+    newip_offset_val->contract_offset = (__uint8_t)(sizeof(struct newip_offset) + sizeof(struct shipping_spec) + sizeof(struct src_addr) + sizeof(struct dst_addr));
+    newip_offset_val->payload_offset = (__uint8_t)(sizeof(struct newip_offset) + sizeof(struct shipping_spec) + sizeof(struct src_addr) + sizeof(struct dst_addr) + sizeof(struct TinTin));
     printf("size of shipping spec%x\n", sizeof(struct shipping_spec));
     printf("contract offset:%x\n", newip_offset_val->contract_offset);
     printf("payload offset:%x\n", newip_offset_val->payload_offset);
@@ -162,19 +162,27 @@ void make_packet_send(struct Packet packet)
     shipping_spec_val->src_addr_type = 0;
     shipping_spec_val->dst_addr_type = 0;
     shipping_spec_val->addr_cast = 0;
-    shipping_spec_val->src_addr = htonl(0x0a000002);
-    shipping_spec_val->dst_addr = htonl(0x0a000102);
-    total_len += sizeof(struct shipping_spec);
 
-    struct TinTin *tintin = (struct TinTin *)(sendbuff + sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct shipping_spec));
-    tintin->contract_type = htons(4);
-    tintin->next_proto = htons(1);
-    tintin->hdr_len = htons(2);
-    tintin->control_w = htons(3);
-    tintin->msg_type = htons(packet.msg_type);
-    tintin->auth_conn_cookie = packet.authentication_cookie;
-    tintin->mlen = htons(6);
-    tintin->mflags = htons(packet.mflags);
+    struct src_addr *src_addr_val;
+    src_addr_val = (struct src_addr *)(sendbuff + sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct shipping_spec));
+    src_addr_val->v4_src_addr = htonl(0x0a000002);
+
+
+    struct dst_addr *dst_addr_val;
+    dst_addr_val = (struct dst_addr *)(sendbuff + sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct shipping_spec) + sizeof(struct src_addr));
+    dst_addr_val->v4_dst_addr = htonl(0x0a000102);
+    
+    total_len += sizeof(struct shipping_spec) + sizeof(struct src_addr) + sizeof(struct dst_addr);
+
+    struct TinTin *tintin = (struct TinTin *)(sendbuff + sizeof(struct ethhdr) + sizeof(struct newip_offset) + sizeof(struct shipping_spec) + sizeof(struct src_addr) + sizeof(struct dst_addr));
+    tintin->contract_type = (4);
+    tintin->next_proto = (1);
+    tintin->hdr_len = (2);
+    tintin->control_w = (3);
+    tintin->msg_type = (packet.msg_type);
+    tintin->auth_conn_cookie = htonl(packet.authentication_cookie);
+    tintin->mlen = (6);
+    tintin->mflags = (packet.mflags);
     tintin->magic = htons(8);
 
     total_len = PACKET_SIZE;

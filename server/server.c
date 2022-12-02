@@ -37,14 +37,14 @@ int main()
 
     struct ifreq ifreq_i;
     memset(&ifreq_i, 0, sizeof(ifreq_i));
-    strncpy(ifreq_i.ifr_name, "eth1", IFNAMSIZ - 1);
+    strncpy(ifreq_i.ifr_name, "h2_r1", IFNAMSIZ - 1);
     if ((ioctl(sock_raw, SIOCGIFINDEX, &ifreq_i)) < 0)
         printf("error in index ioctl reading");
 
     // getting MAC Address
 
     memset(&ifreq_c, 0, sizeof(ifreq_c));
-    strncpy(ifreq_c.ifr_name, "eth1", IFNAMSIZ - 1);
+    strncpy(ifreq_c.ifr_name, "h2_r1", IFNAMSIZ - 1);
     if ((ioctl(sock_raw, SIOCGIFHWADDR, &ifreq_c)) < 0)
         printf("error in SIOCGIFHWADDR ioctl reading");
 
@@ -75,10 +75,10 @@ int main()
             perror("error in recvfrom");
 
         struct ethhdr *eth = (struct ethhdr *)(request->buffer);
-
+        
         if (eth->h_proto == 46728)
         {
-            // printf("New IP packet received!\n");
+            printf("New IP packet received!, eth-proto %d\n", eth->h_proto);
             rc = pthread_create(&threads[thread_no], NULL, request_handling, (void *)request);
             if (rc)
             {

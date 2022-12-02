@@ -1,12 +1,12 @@
-struct __attribute__((__packed__)) TinTin
+struct TinTin
 {
-    uint16_t contract_type;
-    uint16_t next_proto;
-    uint16_t hdr_len;
-    uint16_t control_w;
-    uint16_t msg_type;
-    uint16_t mlen;
-    uint16_t mflags;
+    uint8_t contract_type;
+    uint8_t next_proto;
+    uint8_t hdr_len;
+    uint8_t control_w;
+    uint8_t msg_type;
+    uint8_t mlen;
+    uint8_t mflags;
     uint16_t magic;
     uint32_t auth_conn_cookie;
 };

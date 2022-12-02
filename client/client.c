@@ -83,7 +83,7 @@ int main()
     struct Packet packet;
     packet.msg_type = 1;
     packet.mflags = 0;
-    packet.authentication_cookie = 1; // ******* generate auth cookie *********
+    packet.authentication_cookie = (1); // ******* generate auth cookie *********
     char buf[18];
     FILE *fp = fopen("../h1_r1_mac.txt", "r");
     fscanf(fp, "%s", buf);
