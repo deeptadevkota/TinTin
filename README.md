@@ -9,7 +9,7 @@ Instructions for USE:
 NAMESPACES:
 1. Emulate the network by running the bash file using sudo privileges.
 ```
-$ sudo ./ns.sh
+$ sudo python3 setup2.py
 ```
 
 SERVER:
@@ -24,7 +24,7 @@ $ make
 ```
 4. Run the executable 'server' in the server namespace
 ```
-$ sudo ip netns exec server ./server
+$ sudo ip netns exec h2 ./server
 ```
 5. The Server has started listening
 	
@@ -40,7 +40,7 @@ $ make
 ```
 4. Run the executable 'client' in the client namespace
 ```
-$ sudo ip netns exec client ./client
+$ sudo ip netns exec h1 ./client
 ```
 5. The client will now establish connection with the server.
 
