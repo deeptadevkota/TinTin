@@ -3,6 +3,11 @@ Description
 
 The project contains a server and a client which communicate using TinTin protocol. 
 
+Topology:
+---------------------
+```
+ |client| <----> |router| <----> |server|
+```
 Instructions for USE:
 ---------------------
 
@@ -11,7 +16,19 @@ NAMESPACES:
 ```
 $ sudo python3 setup2.py
 ```
-
+INSTALL LBF MODULES:
+```
+$ cd lbf
+```
+```
+$ sudo ./install-modules
+```
+```
+$ sudo ./install-tc-support
+```
+```
+$ cd ..
+```
 SERVER:
 1. The folder server makes a complete and independent 'server' which communicates with a client
 2. cd to the folder 'server':
@@ -20,9 +37,12 @@ $ cd server
 ```
 3. Run the make command
 ```
+$ rm -f *.o
+```
+```
 $ make
 ```
-4. Run the executable 'server' in the server namespace
+4. Run the executable 'server' in the h2 namespace
 ```
 $ sudo ip netns exec h2 ./server
 ```
@@ -36,9 +56,12 @@ $ cd client
 ```
 3. Run the make command
 ```
+$ rm -f *.o
+```
+```
 $ make
 ```
-4. Run the executable 'client' in the client namespace
+4. Run the executable 'client' in the h1 namespace
 ```
 $ sudo ip netns exec h1 ./client
 ```
